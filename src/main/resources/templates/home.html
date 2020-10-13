@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>mainPage</title>
+    <link href="/css/style.css" rel="stylesheet">
+</head>
+<body>
+<h4> Welcome Spring!!!</h4>
+<h3 th:text="${msg}" th:if="${msg != null}"></h3>
+<a href="/loginPage" th:if="${username == null}"> LOGIN</a>
+<a href="/logout" th:if="${username != null}"> LOGOUT</a>
+<h3 th:text="Welcome + ' ' + ${username}" th:if="${username != null}"></h3>
+
+<h5> ADD USER: </h5>
+<form action="/addUser" method="post" enctype="multipart/form-data">
+    <input type="text" name="name" placeholder="Please input name"><br>
+    <input type="text" name="surname" placeholder="Please input surname"><br>
+        <input type="text" name="username" placeholder="Please input username"><br>
+        <input type="password" name="password" placeholder="Please input password"><br>
+        <select name="role">
+            <option value="USER"> USER</option>
+            <option value="ADMIN"> ADMIN</option>
+        </select><br>
+    <input type="file" name="image"><br>
+    <input type="submit" value="Add User">
+</form>
+
+<h5> ADD Book: </h5>
+<form action="/saveBook" method="post">
+    <input type="text" name="title" placeholder="Please input title"><br>
+    <textarea name="description" placeholder="Please input description"></textarea><br>
+    <select name="user.id">
+        <option th:each="user: ${users}" th:value="${user.id}" th:text="${user.name}"></option>
+    </select><br>
+    <input type="submit" value="Add Book">
+</form>
+
+<h5> USERS: </h5>
+<ul>
+    <div th:each="user: ${users}" th:remove="tag">
+        <img th:src="@{/image(name=${user.profilePic})}" width="20"
+             th:if="${user.profilePic != null && user.profilePic.length() != 0}">
+    <li th:text="${user.name} + ' ' + ${user.surname}"></li>
+    <a th:href="@{/deleteUser(id=${user.id})}">Delete</a>
+    </div>
+</ul>
+<h5> BOOKS: </h5>
+<ul>
+    <div th:each="book: ${books}" th:remove="tag">
+        <li th:text="${book.title} + ' ' + ${book.user.name}"></li>
+        <a th:href="@{/deleteBook(id=${book.id})}">Delete</a> / <a th:href="@{/editBook(id=${book.id})}">Edit</a>
+    </div>
+</ul>
+<a href="/about"> About Us </a>
+</body>
+</html>
