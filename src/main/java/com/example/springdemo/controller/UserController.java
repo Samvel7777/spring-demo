@@ -5,6 +5,7 @@ import com.example.springdemo.service.EmailService;
 import com.example.springdemo.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.io.IOUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -25,7 +26,6 @@ public class UserController {
 
     @Value("${file.upload.dir}")
     private String uploadDir;
-
     private final UserService userService;
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;

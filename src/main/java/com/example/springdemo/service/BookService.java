@@ -3,6 +3,8 @@ package com.example.springdemo.service;
 import com.example.springdemo.model.Book;
 import com.example.springdemo.repository.BookRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -14,8 +16,8 @@ public class BookService {
 
     private final BookRepository bookRepository;
 
-    public List<Book> findAll() {
-        return bookRepository.findAll();
+    public Page<Book> findAll(PageRequest pageRequest) {
+        return bookRepository.findAll(pageRequest);
     }
 
     public void save(Book user) {

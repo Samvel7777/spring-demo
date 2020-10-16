@@ -6,6 +6,8 @@
     <link href="/css/style.css" rel="stylesheet">
 </head>
 <body>
+<header th:insert="fragments/general.html :: header"></header>
+<br>
 <h3> Edit Book: </h3>
 <form action="/saveBook" method="post">
     <input type="hidden" name="id" th:value="${book.id}">

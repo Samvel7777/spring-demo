@@ -25,8 +25,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         http.csrf().disable()
                 .formLogin()
                 .loginPage("/loginPage")
-                .loginProcessingUrl("/login")
-//                .defaultSuccessUrl("/successLogin") --->
+                .loginProcessingUrl("/perform_login")
+                .defaultSuccessUrl("/successLogin")
                 .and()
                 .logout()
                 .logoutSuccessUrl("/")
@@ -42,15 +42,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
         auth.userDetailsService(userDetailsServiceImpl)
                 .passwordEncoder(passwordEncoder);
-
-//        auth.inMemoryAuthentication()
-//                .withUser("poxos")
-//                .password(passwordEncoder.encode("poxos"))
-//                .roles("USER")
-//                .and()
-//                .withUser("petros")
-//                .password(encoder().encode("petros"))
-//                .roles("ADMIN");
     }
 
     @Bean
