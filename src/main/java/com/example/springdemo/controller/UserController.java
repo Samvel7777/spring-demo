@@ -5,11 +5,11 @@ import com.example.springdemo.service.EmailService;
 import com.example.springdemo.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.io.IOUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -30,7 +30,14 @@ public class UserController {
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
 
-    @PostMapping("/addUser")
+    @GetMapping("/user")
+    public String userPage(ModelMap modelMap, @RequestParam(name = "msg", required = false) String msg) {
+        modelMap.addAttribute("users", userService.findAll());
+        modelMap.addAttribute("msg", msg);
+        return "user";
+    }
+
+    @PostMapping("/user/add")
     public String addUser(@ModelAttribute User user, @RequestParam("image") MultipartFile file) throws IOException {
         if (!user.getPassword().equals(user.getConfirmPassword())) {
             return "redirect:/?msg=Password and ConfirmPassword dase note match!!!";
@@ -47,13 +54,13 @@ public class UserController {
         user.setActive(false);
         user.setToken(UUID.randomUUID().toString());
         userService.save(user);
-        String link = "http://localhost:8081/activate?email=" + user.getUsername() + "&token=" + user.getToken();
+        String link = "http://localhost:8081/user/activate?email=" + user.getUsername() + "&token=" + user.getToken();
         emailService.send(user.getUsername(),
                 "Wlecome", "Dear " + user.getName() + " You have successfully registered. Please activate your account by clicking on: ->" + link);
         return "redirect:/?msg=User was added";
     }
 
-    @GetMapping("/activate")
+    @GetMapping("/user/activate")
     public String activate(@RequestParam("email") String username, @RequestParam("token") String token) {
         Optional<User> byUsername = userService.findByUsername(username);
         if (byUsername.isPresent()) {
@@ -68,7 +75,7 @@ public class UserController {
         return "redirect:/?msg=Something went wrong. Please try again!!!";
     }
 
-    @GetMapping("/deleteUser")
+    @GetMapping("/user/delete")
     public String deleteUser(@RequestParam("id") int id) {
         userService.deleteById(id);
         String msg = "User was removed";

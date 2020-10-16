@@ -5,6 +5,7 @@ import com.example.springdemo.repository.BookRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -16,12 +17,12 @@ public class BookService {
 
     private final BookRepository bookRepository;
 
-    public Page<Book> findAll(PageRequest pageRequest) {
+    public Page<Book> findAll(PageRequest pageRequest, Sort sort) {
         return bookRepository.findAll(pageRequest);
     }
 
-    public void save(Book user) {
-        bookRepository.save(user);
+    public Book save(Book book) {
+        return bookRepository.save(book);
     }
 
     public Optional<Book> findById(int id) {
