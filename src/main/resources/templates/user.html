@@ -6,6 +6,7 @@
     <link href="/static/css/style.css" rel="stylesheet">
 </head>
 <body>
+<a href="/"> Home </a>
 <header th:insert="fragments/general.html :: header"></header>
 <h3 style="color: green" th:text="${msg}" th:if="${msg != null}"></h3>
 <br>
@@ -13,12 +14,12 @@
 <form action="/user/add" method="post" enctype="multipart/form-data">
     <input type="text" name="name" placeholder="Please input name"><br>
     <input type="text" name="surname" placeholder="Please input surname"><br>
-    <input type="text" name="username" placeholder="Please input username"><br>
+    <input type="email" name="username" placeholder="Please input email"><br>
     <input type="password" name="password" placeholder="Please input password"><br>
     <input type="password" name="confirmPassword" placeholder="Please input password once again"><br>
     <select name="role">
-        <option value="USER"> USER</option>
-        <option value="ADMIN"> ADMIN</option>
+        <option value="USER">USER</option>
+        <option value="ADMIN">ADMIN</option>
     </select><br>
     <input type="file" name="image"><br>
     <input type="submit" value="Add User">
@@ -39,18 +40,19 @@
     </tr>
     </thead>
     <tbody>
-    <tr th:each="user: ${users}" th:remove="tag">
-        <td><img th:src="@{/image(name=${user.profilePic})}" width="20"
-                 th:if="${user.profilePic != null && user.profilePic.length() != 0}"></td>
+    <tr th:each="user: ${users}">
+        <td> <img th:src="@{/image(name=${user.profilePic})}" width="20"
+                  th:if="${user.profilePic != null && user.profilePic.length() != 0}"/></td>
         <td th:text="${user.name}"></td>
         <td th:text="${user.surname}"></td>
         <td th:text="${user.username}"></td>
         <td th:text="${user.role.name()}"></td>
         <td th:text="${user.active}"></td>
-        <td><a th:href="@{/user/delete(id=${user.id})}">Delete</a></td>
+        <td><a th:href="@{/user/delete(id=${user.id})}">delete</a>
+        </td>
     </tr>
     </tbody>
 </table>
-<a href="/"> Home </a>
+
 </body>
 </html>

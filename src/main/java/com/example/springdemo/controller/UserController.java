@@ -1,5 +1,6 @@
 package com.example.springdemo.controller;
 
+import com.example.springdemo.dto.UserRequestDto;
 import com.example.springdemo.model.User;
 import com.example.springdemo.service.EmailService;
 import com.example.springdemo.service.UserService;
@@ -10,15 +11,20 @@ import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.mail.MessagingException;
+import javax.validation.Valid;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.UUID;
+//import static com.example.springdemo.util.TextUtil.VALID_EMAIL_ADDRESS_REGEX;
 
 @Controller
 @RequiredArgsConstructor
@@ -26,6 +32,7 @@ public class UserController {
 
     @Value("${file.upload.dir}")
     private String uploadDir;
+
     private final UserService userService;
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
@@ -38,26 +45,39 @@ public class UserController {
     }
 
     @PostMapping("/user/add")
-    public String addUser(@ModelAttribute User user, @RequestParam("image") MultipartFile file) throws IOException {
-        if (!user.getPassword().equals(user.getConfirmPassword())) {
-            return "redirect:/?msg=Password and ConfirmPassword dase note match!!!";
+    public String addUser(@ModelAttribute @Valid UserRequestDto userRequest, BindingResult bindingResult, ModelMap modelMap, @RequestParam("image") MultipartFile file, Locale locale) throws IOException, MessagingException {
+//        if (!VALID_EMAIL_ADDRESS_REGEX.matcher(userRequest.getUsername()).find()) {
+//            return "redirect:/user?msg=Email dose not valid!!!";
+//        }
+        if (bindingResult.hasErrors()) {
+            modelMap.addAttribute("users", userService.findAll());
+            return "user";
         }
-        Optional<User> byUsername = userService.findByUsername(user.getUsername());
+        if (!userRequest.getPassword().equals(userRequest.getConfirmPassword())) {
+            return "redirect:/user?msg=Password and ConfirmPassword dase note match!!!";
+        }
+        Optional<User> byUsername = userService.findByUsername(userRequest.getUsername());
         if (byUsername.isPresent()) {
-            return "redirect:/?msg=User already exists!!!";
+            return "redirect:/user?msg=User already exists!!!";
         }
-        String name = System.currentTimeMillis() + "_" + file.getOriginalFilename();
-        File image = new File(uploadDir, name);
+        String profilePic = System.currentTimeMillis() + "_" + file.getOriginalFilename();
+        File image = new File(uploadDir, profilePic);
         file.transferTo(image);
-        user.setProfilePic(name);
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-        user.setActive(false);
-        user.setToken(UUID.randomUUID().toString());
+        User user = User.builder()
+                .name(userRequest.getName())
+                .surname(userRequest.getSurname())
+                .username(userRequest.getUsername())
+                .password(passwordEncoder.encode(userRequest.getPassword()))
+                .active(false)
+                .token(UUID.randomUUID().toString())
+                .profilePic(profilePic)
+                .role(userRequest.getRole())
+                .build();
         userService.save(user);
         String link = "http://localhost:8081/user/activate?email=" + user.getUsername() + "&token=" + user.getToken();
-        emailService.send(user.getUsername(),
-                "Wlecome", "Dear " + user.getName() + " You have successfully registered. Please activate your account by clicking on: ->" + link);
-        return "redirect:/?msg=User was added";
+        emailService.sendHtmlEmail(user.getUsername(),
+                "Wlecome", user, link, "email/UserWelcomeMail.html", locale);
+        return "redirect:/user?msg=User was added";
     }
 
     @GetMapping("/user/activate")
@@ -69,17 +89,17 @@ public class UserController {
                 user.setActive(true);
                 user.setToken("");
                 userService.save(user);
-                return "redirect:/?msg=User was activate. Please Login";
+                return "redirect:/user?msg=User was activate. Please Login";
             }
         }
-        return "redirect:/?msg=Something went wrong. Please try again!!!";
+        return "redirect:/user?msg=Something went wrong. Please try again!!!";
     }
 
     @GetMapping("/user/delete")
     public String deleteUser(@RequestParam("id") int id) {
         userService.deleteById(id);
         String msg = "User was removed";
-        return "redirect:/?msg=" + msg;
+        return "redirect:/user?msg=" + msg;
     }
 
     @GetMapping(value = "/image", produces = MediaType.IMAGE_JPEG_VALUE)

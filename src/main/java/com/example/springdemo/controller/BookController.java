@@ -56,7 +56,7 @@ public class BookController {
     public String addUser(@ModelAttribute Book book) {
         String msg = book.getId() > 0 ? "Book was added" : "Book was updated";
         bookService.save(book);
-        return "redirect:/?msg=" + msg;
+        return "redirect:/book?msg=" + msg;
     }
 
     @GetMapping("/book/editPage")
@@ -70,6 +70,6 @@ public class BookController {
     public String deleteBook(@RequestParam("id") int id) {
         bookService.deleteById(id);
         String msg = "Book was removed";
-        return "redirect:/?msg=" + msg;
+        return "redirect:/book?msg=" + msg;
     }
 }
