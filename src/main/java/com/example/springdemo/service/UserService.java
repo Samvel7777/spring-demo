@@ -3,13 +3,16 @@ package com.example.springdemo.service;
 import com.example.springdemo.model.User;
 import com.example.springdemo.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import javax.persistence.EntityNotFoundException;
 import java.util.List;
 import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class UserService {
 
     private final UserRepository userRepository;
@@ -27,6 +30,11 @@ public class UserService {
     }
 
     public Optional<User> findByUsername(String username) {
-        return userRepository.findByUsername(username);
+        try {
+            return userRepository.findByUsername(username);
+        } catch (EntityNotFoundException e) {
+            log.error("User with {} dose ot exists", username);
+            return null;
+        }
     }
 }

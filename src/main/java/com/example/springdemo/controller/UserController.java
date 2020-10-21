@@ -5,6 +5,7 @@ import com.example.springdemo.model.User;
 import com.example.springdemo.service.EmailService;
 import com.example.springdemo.service.UserService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
@@ -28,6 +29,7 @@ import java.util.UUID;
 
 @Controller
 @RequiredArgsConstructor
+@Slf4j
 public class UserController {
 
     @Value("${file.upload.dir}")
@@ -74,6 +76,9 @@ public class UserController {
                 .role(userRequest.getRole())
                 .build();
         userService.save(user);
+
+        log.info("User with {} email was registered.", user.getUsername());
+
         String link = "http://localhost:8081/user/activate?email=" + user.getUsername() + "&token=" + user.getToken();
         emailService.sendHtmlEmail(user.getUsername(),
                 "Wlecome", user, link, "email/UserWelcomeMail.html", locale);
