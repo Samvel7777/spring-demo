@@ -33,7 +33,7 @@ public class BookController {
                            @RequestParam(value = "page", defaultValue = "1") int page,
                            @RequestParam(value = "size", defaultValue = "5") int size,
                            @RequestParam(value = "orderBy", defaultValue = "title") String orderBy,
-                           @RequestParam(value = "arder", defaultValue = "ASC") String order) {
+                           @RequestParam(value = "order", defaultValue = "ASC") String order) {
 
         Sort sort = order.equals("ASC") ? Sort.by(Sort.Order.asc(orderBy)) : Sort.by(Sort.Order.desc(orderBy));
 

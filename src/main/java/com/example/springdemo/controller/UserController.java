@@ -108,4 +108,48 @@ public class UserController {
         InputStream in = new FileInputStream(uploadDir + File.separator + imageName);
         return IOUtils.toByteArray(in);
     }
+
+    @GetMapping("/user/forgotPassword")
+    public String forgotPassword(@RequestParam("email") String email) {
+        Optional<User> byUsername = userService.findByUsername(email);
+        if (byUsername.isPresent() && byUsername.get().isActive()) {
+            User user = byUsername.get();
+            String token = UUID.randomUUID().toString();
+            user.setToken(token);
+            userService.save(user);
+            String link = "http://localhost:8081/user/forgotPassword/reset?email=" + user.getUsername() + "&token=" + token;
+            emailService.send(user.getUsername(), "Reset password ", "Dear user please open this link in order to reset your password " + link);
+        }
+        return "redirect:/";
+    }
+
+    @GetMapping("/user/forgotPassword/reset")
+    public String resetPasswordReset(ModelMap modelMap, @RequestParam("email") String email,
+                                                        @RequestParam("token") String token) {
+        Optional<User> byUsername = userService.findByUsername(email);
+        if (byUsername.isPresent() && byUsername.get().getToken().equals(token)) {
+            modelMap.addAttribute("email", byUsername.get().getUsername());
+            modelMap.addAttribute("token", byUsername.get().getToken());
+            return "changePassword";
+        }
+        return "redirect:/";
+    }
+
+    @PostMapping("/user/forgotPassword/change")
+    public String changePassword(@RequestParam("email") String email,
+                                 @RequestParam("token") String token,
+                                 @RequestParam("password") String password,
+                                 @RequestParam("repeatPassword") String repeatPassword) {
+        Optional<User> byUsername = userService.findByUsername(email);
+        if (byUsername.isPresent()) {
+            User user = byUsername.get();
+            if (user.getToken().equals(token) && user.getPassword().equals(repeatPassword)) {
+                user.setToken("");
+                user.setPassword(passwordEncoder.encode(password));
+                userService.save(user);
+                return "redirect:/?msg=Your password changed!";
+            }
+        }
+        return "redirect:/user";
+    }
 }
